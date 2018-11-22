@@ -1,15 +1,31 @@
 import collections
 import operator
 
-from parser import InterpreterError
+
+class EvaluationError(Exception):
+    """Error while evaluating expression."""
+
+    def __init__(self, value=None):
+        self.value = value
+
+    def __str__(self):
+        msg = self.__class__.__doc__
+        if self.value is not None:
+            msg = msg.rstrip(".")
+            msg += ": " + repr(self.value) + "."
+        return msg
 
 
-class InvalidExpression(InterpreterError):
+class InvalidExpression(EvaluationError):
     """Invalid expression."""
 
 
-class InvalidForm(InterpreterError):
-    """Invalid syntax form."""
+class InvalidOperator(EvaluationError):
+    """Invalid operator."""
+
+
+class MissingArgument(EvaluationError):
+    """Missing argument."""
 
 
 Operator = collections.namedtuple("Operator", "symbol function")
@@ -40,7 +56,7 @@ def evaluate(expression):
             args = (evaluate(e) for e in expression[1:])
             return head.function(*args)
         else:
-            raise InvalidForm()
+            raise InvalidOperator(expression[0])
 
     else:
         raise InvalidExpression()
