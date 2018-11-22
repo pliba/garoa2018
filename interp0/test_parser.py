@@ -26,3 +26,13 @@ def test_parse_atoms(tokens, want):
 def test_parse_no_source():
     with raises(UnexpectedEndOfInput):
         parse([])
+
+
+@mark.parametrize("source,want", [
+    ("(2)", [2]),
+    ("(+ 2 3)", ["+", 2, 3]),
+    ("(+ 2 (* 3 4))", ["+", 2, ["*", 3, 4]]),
+])
+def test_parse_expressions(source, want):
+    tokens = tokenize(source)
+    assert parse(tokens) == want

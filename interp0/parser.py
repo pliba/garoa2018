@@ -13,7 +13,13 @@ def parse(tokens):
         token = tokens.pop(0)
     except IndexError as exc:
         raise UnexpectedEndOfInput() from exc
+    if token == "(":  # s-expression
+        ast = []
+        while tokens[0] != ")":
+            ast.append(parse(tokens))
+        tokens.pop(0)  # pop off ')'
+        return ast
     try:
-        return int(token)  # numeric value
+        return int(token)  # valor numérico
     except ValueError:
-        return token  # symbol
+        return token  # símbolo
