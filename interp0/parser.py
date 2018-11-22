@@ -1,5 +1,16 @@
-class UnexpectedEndOfInput(Exception):
+class InterpreterError(Exception):
+    """Generic interpreter error."""
+
+    def __str__(self):
+        return self.__class__.__doc__
+
+
+class UnexpectedEndOfInput(InterpreterError):
     """Unexpected end of input."""
+
+
+class UnexpectedCloseParen(InterpreterError):
+    """Unexpected ')'."""
 
 
 def tokenize(source_code):
@@ -15,10 +26,14 @@ def parse(tokens):
         raise UnexpectedEndOfInput() from exc
     if token == "(":  # s-expression
         ast = []
-        while tokens[0] != ")":
+        while tokens and tokens[0] != ")":
             ast.append(parse(tokens))
-        tokens.pop(0)  # pop off ')'
+        if not tokens:
+            raise UnexpectedEndOfInput()
+        tokens.pop(0)  # drop ')'
         return ast
+    elif token == ")":
+        raise UnexpectedCloseParen()
     try:
         return int(token)  # valor numérico
     except ValueError:
