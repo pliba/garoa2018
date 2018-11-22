@@ -19,7 +19,7 @@ def tokenize(source_code):
 
 
 def parse(tokens):
-    """Construir expressões aninhadas a partir de uma lista de tokens."""
+    """Construir AST (expressões aninhadas) a partir de uma lista de tokens."""
     try:
         token = tokens.pop(0)
     except IndexError as exc:

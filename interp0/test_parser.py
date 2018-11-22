@@ -43,9 +43,11 @@ def test_parse_no_close_paren():
     with raises(UnexpectedEndOfInput):
         parse(["("])
 
+
 def test_parse_unexpected_close_paren():
     with raises(UnexpectedCloseParen):
         parse([")"])
+
 
 def test_parse_unexpected_close_paren_message():
     with raises(UnexpectedCloseParen) as excinfo:
