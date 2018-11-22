@@ -1,15 +1,15 @@
-class InterpreterError(Exception):
-    """Generic interpreter error."""
+class ParsingError(Exception):
+    """Generic error while parsing source code."""
 
     def __str__(self):
         return self.__class__.__doc__
 
 
-class UnexpectedEndOfInput(InterpreterError):
-    """Unexpected end of input."""
+class UnexpectedEndOfSource(ParsingError):
+    """Unexpected end of source code."""
 
 
-class UnexpectedCloseParen(InterpreterError):
+class UnexpectedCloseParen(ParsingError):
     """Unexpected ')'."""
 
 
@@ -23,18 +23,19 @@ def parse(tokens):
     try:
         token = tokens.pop(0)
     except IndexError as exc:
-        raise UnexpectedEndOfInput() from exc
+        raise UnexpectedEndOfSource() from exc
     if token == "(":  # s-expression
         ast = []
         while tokens and tokens[0] != ")":
             ast.append(parse(tokens))
         if not tokens:
-            raise UnexpectedEndOfInput()
+            raise UnexpectedEndOfSource()
         tokens.pop(0)  # drop ')'
         return ast
     elif token == ")":
         raise UnexpectedCloseParen()
-    try:
-        return int(token)  # valor numérico
-    except ValueError:
-        return token  # símbolo
+    else:
+        try:
+            return int(token)  # valor numérico
+        except ValueError:
+            return token  # símbolo
