@@ -80,6 +80,7 @@ def evaluate(expression):
     """
     if isinstance(expression, int):  # valor numérico
         return expression
+
     elif isinstance(expression, str):  # símbolo
         try:
             return BUILTINS[expression]
