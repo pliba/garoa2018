@@ -1,4 +1,3 @@
-import collections
 import operator
 
 
@@ -40,7 +39,28 @@ class EmptyExpression(EvaluationError):
     """Empty expression."""
 
 
-Operator = collections.namedtuple("Operator", "symbol function arity")
+class Operator:
+
+    def __init__(self, symbol, function, arity):
+        self.symbol = symbol
+        self.function = function
+        self.arity = arity
+
+    def __eq__(self, other):
+        return all([
+            self.symbol == other.symbol,
+            self.function == other.function,
+            self.arity == other.arity,
+        ])
+
+    def evaluate(self, arg_list):
+        if len(arg_list) < self.arity:
+            raise MissingArgument(self.symbol)
+        elif len(arg_list) > self.arity:
+            raise TooManyArguments(self.symbol)
+        values = [evaluate(e) for e in arg_list]
+        return self.function(*values)
+
 
 OPERATORS = [
     Operator("+", operator.add, 2),
@@ -70,16 +90,10 @@ def evaluate(expression):
         if len(expression) == 0:
             raise EmptyExpression()
         head = evaluate(expression[0])
-        if isinstance(head, Operator):
-            args = expression[1:]
-            if len(args) < head.arity:
-                raise MissingArgument(head.symbol)
-            elif len(args) > head.arity:
-                raise TooManyArguments(head.symbol)
-            values = [evaluate(e) for e in args]
-            return head.function(*values)
-        else:
-            raise InvalidOperator(expression[0])
+        try:
+            return head.evaluate(expression[1:])
+        except AttributeError as exc:
+            raise InvalidOperator(expression[0]) from exc
 
     else:
         raise InvalidExpression()
