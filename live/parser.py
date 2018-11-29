@@ -18,13 +18,16 @@ def tokenize(source):
 def parse(tokens):
     assert isinstance(tokens, list)
     head = tokens.pop(0)
-    if head == "(":  # s-expression
+    if head == '(':
+        if tokens[-1] == ')':
+            tokens = tokens[:-1]
+        else:
+            raise UnexpectedEndOfInput()
         ast = []
-        while tokens and tokens[0] != ")":
+        for token in tokens:
+            if token == ')':
+                break
             ast.append(parse(tokens))
-        if not tokens:
-            raise UnexpectedEndOfSource()
-        tokens.pop(0)  # drop ')'
         return ast
     elif head == ')':
         raise UnexpectedCloseParen()
