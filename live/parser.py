@@ -1,5 +1,3 @@
-import collections
-
 class InvalidSource(Exception):
     """Invalid source."""
 
@@ -12,21 +10,25 @@ class UnexpectedEndOfInput(Exception):
 
 def tokenize(source):
     spaced = source.replace('(', ' ( ').replace(')', ' ) ')
-    return collections.deque(spaced.split())
+    return spaced.split()
 
+# ['(', '+', '2', '3', ')']
+# ['+', '2', '3', ')']
 
 def parse(tokens):
-    "Construir AST (expressões aninhadas)"
-    head = tokens.popleft()
+    assert isinstance(tokens, list)
+    head = tokens.pop(0)
     if head == "(":  # s-expression
         ast = []
         while tokens and tokens[0] != ")":
             ast.append(parse(tokens))
-        tokens.popleft()  # descartar ')'
+        if not tokens:
+            raise UnexpectedEndOfSource()
+        tokens.pop(0)  # drop ')'
         return ast
     elif head == ')':
         raise UnexpectedCloseParen()
     try:
-        return int(head)  # número
+        return int(head)
     except ValueError:
-        return head  # símbolo
+        return head
