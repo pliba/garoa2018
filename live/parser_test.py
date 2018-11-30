@@ -21,12 +21,9 @@ def test_tokenize(source, want):
     (['sqrt'], 'sqrt'),
     (['(', 'now', ')'], ['now']),
     (['(', '+', '2', '3', ')'], ['+', 2, 3]),
+    (['(', '+', '(', '*', '3', '5', ')', '2', ')'], ['+', ['*', 3, 5], 2]),
+    (['(', '+', '2', '(', '*', '3', '5', ')',')'], ['+', 2, ['*', 3, 5]]),
 ])
 def test_parse(tokens, want):
     ast = parse(tokens)
-    assert want == ast
-
-def test_parse_double_close():
-    ast = parse(tokenize('(+ 2 (* 4 5))'))
-    want = ['+', 2, ['*', 4, 5]]
     assert want == ast
