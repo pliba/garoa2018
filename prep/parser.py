@@ -12,7 +12,7 @@ def parse(tokens):
     head = tokens.pop(0)
     if head == '(':
         ast = []
-        while tokens and tokens[0] != ")":
+        while tokens[0] != ')':
             ast.append(parse(tokens))
         tokens.pop(0)  # drop ')'
         return ast
