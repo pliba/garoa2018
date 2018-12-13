@@ -1,13 +1,28 @@
 import operator
-import collections
 
 class MissingArgument(Exception):
     """Missing argument."""
 
+
 class TooManyArguments(Exception):
     """Too many arguments."""
 
-Operator = collections.namedtuple('Operator', 'arity function')
+class Operator:
+    def __init__(self, arity, function):
+        self.arity = arity
+        self.function = function
+
+    def __eq__(self, other):
+        return self.arity == other.arity and self.function == other.function
+
+    def apply(self, *args):
+        if len(args) > self.arity:
+            raise TooManyArguments()
+        elif len(args) < self.arity:
+            raise MissingArgument()
+        values = (evaluate(arg) for arg in args)
+        return self.function(*values)
+
 
 BUILTINS = {
     '+': Operator(2, operator.add),
@@ -23,14 +38,6 @@ def evaluate(ast):
         return ast
     elif isinstance(ast, list):
         op = evaluate(ast[0])
-        len_args = len(ast[1:])
-     
-        if len_args > op.arity:
-            raise TooManyArguments()
-        elif len_args < op.arity:
-            raise MissingArgument()
-     
-        args = (evaluate(arg) for arg in ast[1:])
-        return op.function(*args)
+        return op.apply(*ast[1:])
 
     return BUILTINS[ast]

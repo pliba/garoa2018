@@ -27,3 +27,13 @@ def test_tokenize(source, want):
 def test_parse(tokens, want):
     ast = parse(tokens)
     assert want == ast
+
+
+def test_parse_multiple_expressions():
+    source = '(+ 1 3) (* 2 4)'
+    tokens = tokenize(source)
+    ast = parse(tokens)
+    want = ['+', 1, 3]
+    assert want == ast
+    unparsed_tokens = ['(', '*', '2', '4', ')']
+    assert  unparsed_tokens == tokens
