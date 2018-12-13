@@ -1,6 +1,7 @@
 # LR
 .venv*
 .idea
+.vscode
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
