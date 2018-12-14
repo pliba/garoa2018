@@ -1,5 +1,4 @@
-class UnexpectedCloseParen(Exception):
-    """Unexpected ')'."""
+import errors
 
 
 def tokenize(source):
@@ -11,8 +10,10 @@ def parse(tokens):
     head = tokens.pop(0)
     if head == '(':
         ast = []
-        while tokens[0] != ')':
+        while tokens and tokens[0] != ")":
             ast.append(parse(tokens))
+        if not tokens:
+            raise errors.UnexpectedEndOfSource()
         tokens.pop(0)  # drop ')'
         return ast
     try:

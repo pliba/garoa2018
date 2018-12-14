@@ -4,7 +4,7 @@ import sys
 
 import parser
 import evaluator
-
+import errors
 
 QUIT_COMMAND = '.q'
 
@@ -16,17 +16,24 @@ class Prompts:
 
 def repl(input_fn=input):
     prompt = Prompts.primary
+    pending_lines = []
     print(f'To exit, type {QUIT_COMMAND}', file=sys.stderr)
     while True:
         # ______________________________ Read
         try:
-            source = input_fn(prompt + ' ').strip(' ')
+            current = input_fn(prompt + ' ').strip(' ')
         except EOFError:
             break
-        if source == QUIT_COMMAND:
+        if current == QUIT_COMMAND:
             break
+        pending_lines.append(current)
         # ______________________________ Parse
-        expr = parser.parse(parser.tokenize(source))
+        source = ' '.join(pending_lines)        
+        try:
+            expr = parser.parse(parser.tokenize(source))
+        except errors.UnexpectedEndOfSource:
+            prompt = Prompts.secondary
+            continue
         # ______________________________ Evaluate & Print
         result = evaluator.evaluate(expr)
         print(result)

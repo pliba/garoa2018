@@ -17,6 +17,12 @@ def test_repl_quit(capsys):
     > (* 111 111)
     12321
     """,
+    """
+    > (* 111
+    ... 111)
+    12321
+    """,
+
 ])
 def test_repl(capsys, session):
     dlg = Dialogue(session)
