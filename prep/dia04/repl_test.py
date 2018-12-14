@@ -30,10 +30,9 @@ def test_repl(capsys, session):
     assert dlg.session == captured.out
 
 
-@mark.xfail
 @mark.parametrize("session", [
     """
-    > (+ 2 
+    > (+ 2
     ... 3)
     5
     > (* 2 3)

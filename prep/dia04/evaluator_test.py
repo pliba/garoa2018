@@ -20,7 +20,8 @@ def test_evaluate_symbol():
     got = evaluate(ast)
     assert want == got
 
-@mark.parametrize("source,want",[
+
+@mark.parametrize("source,want", [
     ('(* 2 3)', 6),
     ('(* 2 (* 3 4))', 24),
     # (100°F − 32) * 5 / 9 = 37°C

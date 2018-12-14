@@ -28,7 +28,7 @@ def repl(input_fn=input):
             break
         pending_lines.append(current)
         # ______________________________ Parse
-        source = ' '.join(pending_lines)        
+        source = ' '.join(pending_lines)
         try:
             expr = parser.parse(parser.tokenize(source))
         except errors.UnexpectedEndOfSource:
@@ -39,6 +39,7 @@ def repl(input_fn=input):
         print(result)
         # ______________________________ Loop
         pending_lines = []
+        prompt = Prompts.primary
 
 
 if __name__ == '__main__':

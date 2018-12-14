@@ -1,11 +1,13 @@
 import operator
 
+
 class MissingArgument(Exception):
     """Missing argument."""
 
 
 class TooManyArguments(Exception):
     """Too many arguments."""
+
 
 class Operator:
     def __init__(self, arity, function):
@@ -32,6 +34,7 @@ BUILTINS = {
     'mod': Operator(2, operator.mod),
     'abs': Operator(1, abs)
 }
+
 
 def evaluate(ast):
     if isinstance(ast, int):
