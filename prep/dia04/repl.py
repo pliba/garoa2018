@@ -37,6 +37,8 @@ def repl(input_fn=input):
         # ______________________________ Evaluate & Print
         result = evaluator.evaluate(expr)
         print(result)
+        # ______________________________ Loop
+        pending_lines = []
 
 
 if __name__ == '__main__':
