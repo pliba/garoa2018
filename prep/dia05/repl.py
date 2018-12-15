@@ -18,6 +18,7 @@ def repl(input_fn=input):
     prompt = Prompts.primary
     pending_lines = []
     print(f'To exit, type {QUIT_COMMAND}', file=sys.stderr)
+    error_msg = ''
     while True:
         # ______________________________ Read
         try:
@@ -34,9 +35,15 @@ def repl(input_fn=input):
         except errors.UnexpectedEndOfSource:
             prompt = Prompts.secondary
             continue
+        except errors.UnexpectedCloseParen:
+            error_msg = '*** Unexpected close parenthesis.'
         # ______________________________ Evaluate & Print
-        result = evaluator.evaluate(ast)
-        print(result)
+        if not error_msg:
+            result = evaluator.evaluate(ast)
+            print(result)
+        else:
+            print(error_msg)
+            error_mst = ''
         # ______________________________ Loop
         pending_lines = []
         prompt = Prompts.primary
