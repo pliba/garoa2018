@@ -53,3 +53,13 @@ def test_evaluate_excess_arg2():
     ast = parse(tokenize(source))
     with raises(TooManyArguments):
         evaluate(ast)
+
+
+def test_evaluate_multiple_lines():
+    source = '(+ 2 3)\n(* 2 3)'
+    want = [5, 6]
+    tokens = tokenize(source)
+    while tokens:
+        ast = parse(tokens)
+        got = evaluate(ast)
+        assert want.pop(0) == got
