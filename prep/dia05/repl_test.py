@@ -39,7 +39,28 @@ def test_repl(capsys, session):
     6
     """,
 ])
-def test_repl_multiple_expressions(capsys, session):
+def test_repl_multiple_inputs(capsys, session):
+    dlg = Dialogue(session)
+    repl(dlg.fake_input)
+    captured = capsys.readouterr()
+    assert dlg.session == captured.out
+
+
+@mark.parametrize("session", [
+    """
+    > (+ 2 3) (* 2 3)
+    5
+    """,
+    """
+    > (* 2 3) (
+    6
+    """,
+    """
+    > (* 3 4) this will be ignored!
+    12
+    """,
+])
+def test_repl_ignore_beyond_first_expression(capsys, session):
     dlg = Dialogue(session)
     repl(dlg.fake_input)
     captured = capsys.readouterr()

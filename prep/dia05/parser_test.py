@@ -40,6 +40,16 @@ def test_parse_multiple_expressions():
     assert unparsed_tokens == tokens
 
 
+def test_parse_ignore_extra_tokens():
+    source = '(+ 1 3))'
+    tokens = tokenize(source)
+    ast = parse(tokens)
+    want = ['+', 1, 3]
+    assert want == ast
+    unparsed_tokens = [')']
+    assert unparsed_tokens == tokens
+
+
 @mark.parametrize("source", [
     '(',
     '(+',
