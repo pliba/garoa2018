@@ -34,5 +34,5 @@ class TooManyArguments(EvaluatorException):
 class DivisionByZero(EvaluatorException):
     """Division by zero."""
 
-class UnknownFunction(EvaluatorException):
+class UnknownSymbol(EvaluatorException):
     """Unknown function."""

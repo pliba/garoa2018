@@ -77,7 +77,7 @@ def test_evaluate_division_by_zero():
 def test_evaluate_unknown_function():
     source = '($ 1 2)'
     ast = parse(tokenize(source))
-    with raises(errors.UnknownFunction):
+    with raises(errors.UnknownSymbol):
         evaluate(ast)
        
 
@@ -90,3 +90,54 @@ def test_evaluate_if(source, want):
     ast = parse(tokenize(source))
     got = evaluate(ast)
     assert want == got
+
+
+def test_evaluate_set():
+    source = '(set x 3)\n(* 2 x)'
+    want = [3, 6]
+    tokens = tokenize(source)
+    while tokens:
+        ast = parse(tokens)
+        got = evaluate(ast)
+        assert want.pop(0) == got
+
+
+def test_print(capsys):
+    ast = parse(tokenize('(print 7)'))
+    got = evaluate(ast)
+    assert 7 == got
+    captured = capsys.readouterr()
+    assert '7\n' == captured.out
+
+
+def test_begin(capsys):
+    source = """
+    (begin
+        (print 1)
+        (print 2)
+        (print 3)
+    )
+    """
+    ast = parse(tokenize(source))
+    got = evaluate(ast)
+    assert 3 == got
+    captured = capsys.readouterr()
+    assert '1\n2\n3\n' == captured.out
+
+
+@mark.parametrize("source,out", [
+    ('(while 0 (print 1))', ''),
+    ("""(begin
+           (set x 2)
+           (while x (begin
+              (print x)
+              (set x (- x 1))
+           ))
+        )""", '2\n1\n'),
+])
+def test_while(capsys, source, out):
+    ast = parse(tokenize(source))
+    got = evaluate(ast)
+    assert 0 == got
+    captured = capsys.readouterr()
+    assert out == captured.out

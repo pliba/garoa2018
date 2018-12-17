@@ -1,4 +1,5 @@
 import operator
+import collections
 
 import errors
 
@@ -40,6 +41,43 @@ class IfStatement(Form):
             return evaluate(alternative)
 
 
+class SetStatement(Form):
+
+    arity = 2
+
+    def apply(self, *args):
+        self.check_arity(args)
+        symbol, expr = args
+        value = evaluate(expr)
+        global_env[symbol] = value
+        return value
+
+
+class BeginStatement(Form):
+
+    def apply(self, *args):
+        for statement in args[:-1]:
+            evaluate(statement)
+        return evaluate(args[-1])
+
+
+class WhileStatement(Form):
+
+    arity = 2
+
+    def apply(self, *args):
+        self.check_arity(args)
+        condition, block = args
+        while evaluate(condition):
+            evaluate(block)
+        return 0
+
+
+def print_fn(arg):
+    print(arg)
+    return arg
+
+
 BUILTINS = {
     '+': Operator(2, operator.add),
     '-': Operator(2, operator.sub),
@@ -49,11 +87,19 @@ BUILTINS = {
     '<': Operator(2, operator.lt),
     'mod': Operator(2, operator.mod),
     'abs': Operator(1, abs),
+    'print': Operator(1, print_fn)
 }
 
 SPECIAL_FORMS = {
     'if': IfStatement(),
+    'set': SetStatement(),
+    'begin': BeginStatement(),
+    'while': WhileStatement(),
 }
+
+global_vars = {}
+
+global_env = collections.ChainMap(global_vars, SPECIAL_FORMS, BUILTINS)
 
 
 def evaluate(ast):
@@ -64,9 +110,6 @@ def evaluate(ast):
         return op.apply(*ast[1:])
 
     try:
-        return SPECIAL_FORMS[ast]
-    except KeyError:
-        try:
-            return BUILTINS[ast]
-        except KeyError as exc:
-            raise errors.UnknownFunction(ast) from KeyError
+        return global_env[ast]
+    except KeyError as exc:
+        raise errors.UnknownSymbol(ast) from exc
