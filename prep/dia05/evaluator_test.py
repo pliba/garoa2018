@@ -3,8 +3,9 @@ import operator
 from pytest import mark, raises
 
 from evaluator import evaluate, Operator
-from evaluator import MissingArgument, TooManyArguments
 from parser import tokenize, parse
+
+import errors
 
 
 def test_evaluate_integer():
@@ -37,21 +38,21 @@ def test_evaluate_expr(source, want):
 def test_evaluate_missing_arg():
     source = '(* 2)'
     ast = parse(tokenize(source))
-    with raises(MissingArgument):
+    with raises(errors.MissingArgument):
         evaluate(ast)
 
 
 def test_evaluate_excess_arg():
     source = '(mod 2 3 4)'
     ast = parse(tokenize(source))
-    with raises(TooManyArguments):
+    with raises(errors.TooManyArguments):
         evaluate(ast)
 
 
 def test_evaluate_excess_arg2():
     source = '(abs -2 3)'
     ast = parse(tokenize(source))
-    with raises(TooManyArguments):
+    with raises(errors.TooManyArguments):
         evaluate(ast)
 
 
@@ -63,3 +64,10 @@ def test_evaluate_multiple_lines():
         ast = parse(tokens)
         got = evaluate(ast)
         assert want.pop(0) == got
+
+
+def test_evaluate_division_by_zero():
+    source = '(/ 1 0)'
+    ast = parse(tokenize(source))
+    with raises(errors.DivisionByZero):
+        evaluate(ast)

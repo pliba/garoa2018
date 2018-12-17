@@ -1,12 +1,6 @@
 import operator
 
-
-class MissingArgument(Exception):
-    """Missing argument."""
-
-
-class TooManyArguments(Exception):
-    """Too many arguments."""
+import errors
 
 
 class Operator:
@@ -19,11 +13,14 @@ class Operator:
 
     def apply(self, *args):
         if len(args) > self.arity:
-            raise TooManyArguments()
+            raise errors.TooManyArguments()
         elif len(args) < self.arity:
-            raise MissingArgument()
+            raise errors.MissingArgument()
         values = (evaluate(arg) for arg in args)
-        return self.function(*values)
+        try:
+            return self.function(*values)
+        except ZeroDivisionError as exc:
+            raise errors.DivisionByZero from exc
 
 
 BUILTINS = {
