@@ -44,7 +44,7 @@ def repl(input_fn=input):
             print(result)
         else:
             print(error_msg)
-            error_mst = ''
+            error_msg = ''
         # ______________________________ Loop
         pending_lines = []
         prompt = Prompts.primary

@@ -79,7 +79,7 @@ def test_evaluate_division_by_zero():
     ('(if 0 1 2)', 2),
     ('(if (> 1 0) 1 (/ 1 0))', 1),
 ])
-def test_evaluate_expr(source, want):
+def test_evaluate_if(source, want):
     ast = parse(tokenize(source))
     got = evaluate(ast)
     assert want == got

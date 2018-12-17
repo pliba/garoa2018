@@ -3,6 +3,7 @@ from pytest import mark, raises
 from parser import tokenize, parse
 import errors
 
+
 @mark.parametrize("source,want", [
     ('a', ['a']),
     ('abs', ['abs']),

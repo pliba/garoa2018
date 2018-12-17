@@ -13,6 +13,7 @@ class Form:
 
 
 class Operator(Form):
+
     def __init__(self, arity, function):
         self.arity = arity
         self.function = function
@@ -53,6 +54,7 @@ BUILTINS = {
 SPECIAL_FORMS = {
     'if': IfStatement(),
 }
+
 
 def evaluate(ast):
     if isinstance(ast, int):
