@@ -71,3 +71,13 @@ def test_evaluate_division_by_zero():
     ast = parse(tokenize(source))
     with raises(errors.DivisionByZero):
         evaluate(ast)
+
+
+@mark.parametrize("source,want", [
+    ('(if 1 1 2)', 1),
+    ('(if 0 1 2)', 2),
+])
+def test_evaluate_expr(source, want):
+    ast = parse(tokenize(source))
+    got = evaluate(ast)
+    assert want == got

@@ -22,6 +22,9 @@ class Operator:
         except ZeroDivisionError as exc:
             raise errors.DivisionByZero from exc
 
+def if_statement(condition, consequence, alternative):
+    return consequence if condition else alternative
+
 
 BUILTINS = {
     '+': Operator(2, operator.add),
@@ -29,7 +32,8 @@ BUILTINS = {
     '*': Operator(2, operator.mul),
     '/': Operator(2, operator.floordiv),
     'mod': Operator(2, operator.mod),
-    'abs': Operator(1, abs)
+    'abs': Operator(1, abs),
+    'if': Operator(3, if_statement),
 }
 
 
