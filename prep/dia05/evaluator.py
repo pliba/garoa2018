@@ -3,27 +3,40 @@ import operator
 import errors
 
 
-class Operator:
-    def __init__(self, arity, function):
-        self.arity = arity
-        self.function = function
+class Form:
 
-    def __eq__(self, other):
-        return self.arity == other.arity and self.function == other.function
-
-    def apply(self, *args):
+    def check_arity(self, args):
         if len(args) > self.arity:
             raise errors.TooManyArguments()
         elif len(args) < self.arity:
             raise errors.MissingArgument()
+
+
+class Operator(Form):
+    def __init__(self, arity, function):
+        self.arity = arity
+        self.function = function
+
+    def apply(self, *args):
+        self.check_arity(args)
         values = (evaluate(arg) for arg in args)
         try:
             return self.function(*values)
         except ZeroDivisionError as exc:
             raise errors.DivisionByZero from exc
 
-def if_statement(condition, consequence, alternative):
-    return consequence if condition else alternative
+
+class IfStatement(Form):
+
+    arity = 3
+
+    def apply(self, *args):
+        self.check_arity(args)
+        condition, consequence, alternative = args
+        if evaluate(condition):
+            return evaluate(consequence)
+        else:
+            return evaluate(alternative)
 
 
 BUILTINS = {
@@ -31,11 +44,15 @@ BUILTINS = {
     '-': Operator(2, operator.sub),
     '*': Operator(2, operator.mul),
     '/': Operator(2, operator.floordiv),
+    '>': Operator(2, operator.gt),
+    '<': Operator(2, operator.lt),
     'mod': Operator(2, operator.mod),
     'abs': Operator(1, abs),
-    'if': Operator(3, if_statement),
 }
 
+SPECIAL_FORMS = {
+    'if': IfStatement(),
+}
 
 def evaluate(ast):
     if isinstance(ast, int):
@@ -44,4 +61,7 @@ def evaluate(ast):
         op = evaluate(ast[0])
         return op.apply(*ast[1:])
 
-    return BUILTINS[ast]
+    try:
+        return SPECIAL_FORMS[ast]
+    except KeyError:
+        return BUILTINS[ast]

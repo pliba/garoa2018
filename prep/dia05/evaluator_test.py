@@ -19,7 +19,8 @@ def test_evaluate_symbol():
     ast = '*'
     want = Operator(2, operator.mul)
     got = evaluate(ast)
-    assert want == got
+    assert want.arity == got.arity
+    assert want.function == got.function
 
 
 @mark.parametrize("source,want", [
@@ -76,6 +77,7 @@ def test_evaluate_division_by_zero():
 @mark.parametrize("source,want", [
     ('(if 1 1 2)', 1),
     ('(if 0 1 2)', 2),
+    ('(if (> 1 0) 1 (/ 1 0))', 1),
 ])
 def test_evaluate_expr(source, want):
     ast = parse(tokenize(source))
