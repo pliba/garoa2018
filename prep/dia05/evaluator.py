@@ -66,4 +66,7 @@ def evaluate(ast):
     try:
         return SPECIAL_FORMS[ast]
     except KeyError:
-        return BUILTINS[ast]
+        try:
+            return BUILTINS[ast]
+        except KeyError as exc:
+            raise errors.UnknownFunction(ast) from KeyError

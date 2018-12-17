@@ -74,6 +74,13 @@ def test_evaluate_division_by_zero():
         evaluate(ast)
 
 
+def test_evaluate_unknown_function():
+    source = '($ 1 2)'
+    ast = parse(tokenize(source))
+    with raises(errors.UnknownFunction):
+        evaluate(ast)
+       
+
 @mark.parametrize("source,want", [
     ('(if 1 1 2)', 1),
     ('(if 0 1 2)', 2),

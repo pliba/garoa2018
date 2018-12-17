@@ -36,14 +36,18 @@ def repl(input_fn=input):
         except errors.UnexpectedEndOfSource:
             prompt = Prompts.secondary
             continue
-        except errors.UnexpectedCloseParen:
-            error_msg = '*** Unexpected close parenthesis.'
+        except errors.UnexpectedCloseParen as exc:
+            error_msg = str(exc)
         # ______________________________ Evaluate & Print
         if not error_msg:
-            result = evaluator.evaluate(ast)
-            print(result)
-        else:
-            print(error_msg)
+            try:
+                result = evaluator.evaluate(ast)
+            except errors.DivisionByZero as exc:
+                error_msg = str(exc)
+            else:
+                print(result)
+        if error_msg:
+            print('***', error_msg)
             error_msg = ''
         # ______________________________ Loop
         pending_lines = []

@@ -82,3 +82,16 @@ def test_repl_unexpected_close_paren(capsys, session):
     repl(dlg.fake_input)
     captured = capsys.readouterr()
     assert dlg.session == captured.out
+
+
+@mark.parametrize("session", [
+    """
+    > (/ 1 0)
+    *** Division by zero.
+    """,
+])
+def test_repl_error_handling(capsys, session):
+    dlg = Dialogue(session)
+    repl(dlg.fake_input)
+    captured = capsys.readouterr()
+    assert dlg.session == captured.out
