@@ -14,7 +14,9 @@ type
    VALUEOP = PLUSOP .. PRINTOP;
    CONTROLOP = IFOP .. BEGINOP;
 
+   EXP = ^EXPREC;
    (* ... *)
+
    EXPTYPE = (VALEXP,VAREXP,APEXP);
    EXPREC = record
                case etype: EXPTYPE of
@@ -22,14 +24,25 @@ type
                   VAREXP: (varble: NAME);
                   APEXP: (optr: NAME; args: EXPLIST)
             end;
-
    (* ... *)
+
    FUNDEFREC = record
                funname: NAME;
                formals: NAMELIST;
                body: EXP;
                nextfundef: FUNDEF
             end;
+
+var
+   fundefs: FUNDEF;
+
+   globalEnv: ENV;
+
+   currentExp: EXP;
+
+   userinput: array [1..MAXINPUT] of char;
+
+   (* ... *)
 
 (*****************************************************************
  *                     DATA STRUCTURE OP'S                       *
@@ -121,7 +134,23 @@ function parseVal: NUMBER;
 
 function parseEL: EXPLIST; forward;
 (* parseExp - return EXP starting at userinput[pos]              *)
+
 function parseExp: EXP;
+var
+   nm: NAME;
+   el: EXPLIST;
+begin
+   if userinput[pos] = '('
+   then begin   (* APEXP *)
+           pos := skipblanks(pos+1); (* skip '( ..' *)
+           nm := parseName;
+           el := parseEL;
+           parseExp := mkAPEXP(nm, el)
+        end
+   else if isNumber(pos)
+        then parseExp := mkVALEXP(parseVal)   (* VALEXP *)
+        else parseExp := mkVAREXP(parseName)  (* VAREXP *)
+end; (* parseExp *)
 
 (* parseEL - return EXPLIST starting at userinput[pos]           *)
 function parseEL;
@@ -170,6 +199,31 @@ function isTrueVal (n: NUMBER): Boolean;
 function applyValueOp (op: VALUEOP; vl: VALUELIST): NUMBER;
    (* arity - return number of arguments expected by op             *)
    function arity (op: VALUEOP): integer;
+   (* ... *)
+
+begin (* applyValueOp *)
+   if arity(op) <> lengthVL(vl)
+   then begin
+           write('Wrong number of arguments to ');
+           prName(ord(op)+1);
+           writeln;
+           goto 99
+        end;
+   n1 := vl^.head; (* 1st actual *)
+   if arity(op) = 2 then n2 := vl^.tail^.head; (* 2nd actual *)
+   case op of
+      PLUSOP: n := n1+n2;
+      MINUSOP: n := n1-n2;
+      TIMESOP: n := n1*n2;
+      DIVOP: n := n1 div n2;
+      EQOP: if n1 = n2 then n := 1 else n := 0;
+      LTOP: if n1 < n2 then n := 1 else n := 0;
+      GTOP: if n1 > n2 then n := 1 else n := 0;
+      PRINTOP:
+         begin prValue(n1); writeln; n := n1 end
+   end; (* case *)
+   applyValueOp := n
+end; (* applyValueOp *)
 
 
 (*****************************************************************
