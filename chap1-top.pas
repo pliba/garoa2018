@@ -15,7 +15,11 @@ type
    CONTROLOP = IFOP .. BEGINOP;
 
    EXP = ^EXPREC;
-   (* ... *)
+   EXPLIST = ^EXPLISTREC;
+   ENV = ^ENVREC;
+   VALUELIST = ^VALUELISTREC;
+   NAMELIST = ^NAMELISTREC;
+   FUNDEF = ^FUNDEFREC;
 
    EXPTYPE = (VALEXP,VAREXP,APEXP);
    EXPREC = record
@@ -24,7 +28,26 @@ type
                   VAREXP: (varble: NAME);
                   APEXP: (optr: NAME; args: EXPLIST)
             end;
-   (* ... *)
+
+   EXPLISTREC = record
+               head: EXP;
+               tail: EXPLIST
+            end;
+
+   VALUELISTREC = record
+               head: NUMBER;
+               tail: VALUELIST
+            end;
+
+   NAMELISTREC = record
+               head: NAME;
+               tail: NAMELIST
+            end;
+
+   ENVREC = record
+               vars: NAMELIST;
+               values: VALUELIST
+            end;
 
    FUNDEFREC = record
                funname: NAME;
