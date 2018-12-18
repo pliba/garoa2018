@@ -4,6 +4,9 @@ import collections
 import errors
 
 
+# ______________________________________ Built-in functions
+
+
 class Form:
 
     def check_arity(self, args):
@@ -22,10 +25,28 @@ class Operator(Form):
     def apply(self, *args):
         self.check_arity(args)
         values = (evaluate(arg) for arg in args)
-        try:
-            return self.function(*values)
-        except ZeroDivisionError as exc:
-            raise errors.DivisionByZero from exc
+        return self.function(*values)
+
+
+def print_fn(arg):
+    print(arg)
+    return arg
+
+
+BUILTINS = {
+    '+': Operator(2, operator.add),
+    '-': Operator(2, operator.sub),
+    '*': Operator(2, operator.mul),
+    '/': Operator(2, operator.floordiv),
+    '>': Operator(2, operator.gt),
+    '<': Operator(2, operator.lt),
+    'mod': Operator(2, operator.mod),
+    'abs': Operator(1, abs),
+    'print': Operator(1, print_fn)
+}
+
+
+# ______________________________________ Special forms
 
 
 class IfStatement(Form):
@@ -39,18 +60,6 @@ class IfStatement(Form):
             return evaluate(consequence)
         else:
             return evaluate(alternative)
-
-
-class SetStatement(Form):
-
-    arity = 2
-
-    def apply(self, *args):
-        self.check_arity(args)
-        symbol, expr = args
-        value = evaluate(expr)
-        global_env[symbol] = value
-        return value
 
 
 class BeginStatement(Form):
@@ -73,43 +82,78 @@ class WhileStatement(Form):
         return 0
 
 
-def print_fn(arg):
-    print(arg)
-    return arg
+class EnvironmentManager(Form):
+    """Statements that change the environment."""
 
 
-BUILTINS = {
-    '+': Operator(2, operator.add),
-    '-': Operator(2, operator.sub),
-    '*': Operator(2, operator.mul),
-    '/': Operator(2, operator.floordiv),
-    '>': Operator(2, operator.gt),
-    '<': Operator(2, operator.lt),
-    'mod': Operator(2, operator.mod),
-    'abs': Operator(1, abs),
-    'print': Operator(1, print_fn)
-}
+class SetStatement(EnvironmentManager):
+
+    arity = 2
+
+    def apply(self, environment, *args):
+        self.check_arity(args)
+        symbol, expr = args
+        value = evaluate(expr)
+        environment[symbol] = value
+        return value
+
+
+class DefineStatement(EnvironmentManager):
+
+    arity = 3
+
+    def apply(self, environment, *args):
+        self.check_arity(args)
+        name, arg_names, body = args
+        f = UserFunction(name, arg_names, body)
+        environment[name] = f
+        return name
+
+
+class UserFunction(Form):
+
+        def __init__(self, name, arg_names, body):
+            self.name = name
+            self.arity = len(arg_names)
+            self.arg_names = list(arg_names)
+            self.body = list(body)
+
+        def apply(self, *args):
+            self.check_arity(args)
+            values = (evaluate(arg) for arg in args)
+            local_env = XXX
+
 
 SPECIAL_FORMS = {
     'if': IfStatement(),
     'set': SetStatement(),
     'begin': BeginStatement(),
     'while': WhileStatement(),
+    'define': DefineStatement(),
 }
+
+# ______________________________________ Evaluation
+
 
 global_vars = {}
 
 global_env = collections.ChainMap(global_vars, SPECIAL_FORMS, BUILTINS)
 
 
-def evaluate(ast):
+def evaluate(ast, environment=global_env):
     if isinstance(ast, int):
         return ast
     elif isinstance(ast, list):
-        op = evaluate(ast[0])
-        return op.apply(*ast[1:])
+        op = evaluate(ast[0], environment)
+        if isinstance(op, EnvironmentManager):
+            return op.apply(environment, *ast[1:])
+        else:
+            try:
+                return op.apply(*ast[1:])
+            except ZeroDivisionError as exc:
+                raise errors.DivisionByZero from exc
 
     try:
-        return global_env[ast]
+        return environment[ast]
     except KeyError as exc:
         raise errors.UnknownSymbol(ast) from exc

@@ -2,7 +2,9 @@ import operator
 
 from pytest import mark, raises
 
-from evaluator import evaluate, Operator
+from evaluator import evaluate
+import evaluator
+
 from parser import tokenize, parse
 
 import errors
@@ -17,7 +19,7 @@ def test_evaluate_integer():
 
 def test_evaluate_symbol():
     ast = '*'
-    want = Operator(2, operator.mul)
+    want = evaluator.Operator(2, operator.mul)
     got = evaluate(ast)
     assert want.arity == got.arity
     assert want.function == got.function
@@ -141,3 +143,31 @@ def test_while(capsys, source, out):
     assert 0 == got
     captured = capsys.readouterr()
     assert out == captured.out
+
+
+def test_evaluate_define():
+    source = '(define double (n) (* 2 n))'
+    tokens = tokenize(source)
+    ast = parse(tokens)
+    environment = dict(evaluator.global_env)
+    name = evaluate(ast, environment)
+    assert 'double' == name
+    assert name in environment
+    func = environment[name]
+    assert 'double' == func.name
+    assert 1 == func.arity
+    assert ['n'] == func.arg_names
+    assert ['*', 2, 'n'] == func.body
+
+
+def test_evaluate_user_function():
+    source = '(define triple (n) (* 3 n))\n(triple 5)'
+    want = ['triple', 15]
+    tokens = tokenize(source)
+    while tokens:
+        ast = parse(tokens)
+        got = evaluate(ast)
+        assert want.pop(0) == got
+        break  # XXX next iteration: user function application
+
+
