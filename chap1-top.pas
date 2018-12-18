@@ -255,6 +255,9 @@ end; (* applyValueOp *)
 
 (* eval - return value of expression e in local environment rho  *)
 function eval (e: EXP; rho: ENV): NUMBER;
+
+var op: BUILTINOP;
+
    (* evalList - evaluate each expression in el                     *)
    function evalList (el: EXPLIST): VALUELIST;
    (* applyUserFun - look up definition of nm and apply to actuals  *)

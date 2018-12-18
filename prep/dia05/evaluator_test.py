@@ -2,7 +2,7 @@ import operator
 
 from pytest import mark, raises
 
-from evaluator import evaluate
+from evaluator import evaluate, global_env
 import evaluator
 
 from parser import tokenize, parse
@@ -13,14 +13,14 @@ import errors
 def test_evaluate_integer():
     ast = 2
     want = 2
-    got = evaluate(ast)
+    got = evaluate(ast, {})
     assert want == got
 
 
 def test_evaluate_symbol():
     ast = '*'
     want = evaluator.Operator(2, operator.mul)
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert want.arity == got.arity
     assert want.function == got.function
 
@@ -34,7 +34,7 @@ def test_evaluate_symbol():
 ])
 def test_evaluate_expr(source, want):
     ast = parse(tokenize(source))
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert want == got
 
 
@@ -42,21 +42,21 @@ def test_evaluate_missing_arg():
     source = '(* 2)'
     ast = parse(tokenize(source))
     with raises(errors.MissingArgument):
-        evaluate(ast)
+        evaluate(ast, global_env)
 
 
 def test_evaluate_excess_arg():
     source = '(mod 2 3 4)'
     ast = parse(tokenize(source))
     with raises(errors.TooManyArguments):
-        evaluate(ast)
+        evaluate(ast, global_env)
 
 
 def test_evaluate_excess_arg2():
     source = '(abs -2 3)'
     ast = parse(tokenize(source))
     with raises(errors.TooManyArguments):
-        evaluate(ast)
+        evaluate(ast, global_env)
 
 
 def test_evaluate_multiple_lines():
@@ -65,7 +65,7 @@ def test_evaluate_multiple_lines():
     tokens = tokenize(source)
     while tokens:
         ast = parse(tokens)
-        got = evaluate(ast)
+        got = evaluate(ast, global_env)
         assert want.pop(0) == got
 
 
@@ -73,14 +73,14 @@ def test_evaluate_division_by_zero():
     source = '(/ 1 0)'
     ast = parse(tokenize(source))
     with raises(errors.DivisionByZero):
-        evaluate(ast)
+        evaluate(ast, global_env)
 
 
 def test_evaluate_unknown_function():
     source = '($ 1 2)'
     ast = parse(tokenize(source))
     with raises(errors.UnknownSymbol):
-        evaluate(ast)
+        evaluate(ast, global_env)
        
 
 @mark.parametrize("source,want", [
@@ -90,23 +90,25 @@ def test_evaluate_unknown_function():
 ])
 def test_evaluate_if(source, want):
     ast = parse(tokenize(source))
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert want == got
 
 
 def test_evaluate_set():
     source = '(set x 3)\n(* 2 x)'
     want = [3, 6]
+    # make copy of global_env
+    environment = dict(evaluator.global_env)
     tokens = tokenize(source)
     while tokens:
         ast = parse(tokens)
-        got = evaluate(ast)
+        got = evaluate(ast, environment)
         assert want.pop(0) == got
 
 
 def test_print(capsys):
     ast = parse(tokenize('(print 7)'))
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert 7 == got
     captured = capsys.readouterr()
     assert '7\n' == captured.out
@@ -121,7 +123,7 @@ def test_begin(capsys):
     )
     """
     ast = parse(tokenize(source))
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert 3 == got
     captured = capsys.readouterr()
     assert '1\n2\n3\n' == captured.out
@@ -139,7 +141,7 @@ def test_begin(capsys):
 ])
 def test_while(capsys, source, out):
     ast = parse(tokenize(source))
-    got = evaluate(ast)
+    got = evaluate(ast, global_env)
     assert 0 == got
     captured = capsys.readouterr()
     assert out == captured.out
@@ -149,6 +151,7 @@ def test_evaluate_define():
     source = '(define double (n) (* 2 n))'
     tokens = tokenize(source)
     ast = parse(tokens)
+    # make copy of global_env
     environment = dict(evaluator.global_env)
     name = evaluate(ast, environment)
     assert 'double' == name
@@ -164,10 +167,9 @@ def test_evaluate_user_function():
     source = '(define triple (n) (* 3 n))\n(triple 5)'
     want = ['triple', 15]
     tokens = tokenize(source)
+    # make copy of global_env
+    environment = dict(evaluator.global_env)
     while tokens:
         ast = parse(tokens)
-        got = evaluate(ast)
+        got = evaluate(ast, environment)
         assert want.pop(0) == got
-        break  # XXX next iteration: user function application
-
-

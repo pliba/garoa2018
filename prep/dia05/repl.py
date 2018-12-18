@@ -41,7 +41,7 @@ def repl(input_fn=input):
         # ______________________________ Evaluate & Print
         if not error_msg:
             try:
-                result = evaluator.evaluate(ast)
+                result = evaluator.evaluate(ast, evaluator.global_env)
             except errors.DivisionByZero as exc:
                 error_msg = str(exc)
             else:

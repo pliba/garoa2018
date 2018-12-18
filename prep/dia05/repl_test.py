@@ -95,3 +95,30 @@ def test_repl_error_handling(capsys, session):
     repl(dlg.fake_input)
     captured = capsys.readouterr()
     assert dlg.session == captured.out
+
+
+def test_repl_gcd(capsys):
+    session = """
+    > (define not (boolval) (if boolval 0 1))
+    not
+    > (define <> (x y) (not (= x y)))
+    <>
+    > (define mod (m n) (- m (* n (/ m n))))
+    mod
+    > (define gcd (m n)
+    ...   (begin
+    ...       (set r (mod m n))
+    ...       (while (<> r 0)
+    ...            (begin
+    ...                 (set m n)
+    ...                 (set n r)
+    ...                 (set r (mod m n))))
+    ...       n))
+    gcd
+    > (gcd 6 15)
+    3
+    """
+    dlg = Dialogue(session)
+    repl(dlg.fake_input)
+    captured = capsys.readouterr()
+    assert dlg.session == captured.out

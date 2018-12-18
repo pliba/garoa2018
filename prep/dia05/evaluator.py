@@ -22,9 +22,9 @@ class Operator(Form):
         self.arity = arity
         self.function = function
 
-    def apply(self, *args):
+    def apply(self, environment, *args):
         self.check_arity(args)
-        values = (evaluate(arg) for arg in args)
+        values = (evaluate(arg, environment) for arg in args)
         return self.function(*values)
 
 
@@ -38,6 +38,7 @@ BUILTINS = {
     '-': Operator(2, operator.sub),
     '*': Operator(2, operator.mul),
     '/': Operator(2, operator.floordiv),
+    '=': Operator(2, operator.eq),
     '>': Operator(2, operator.gt),
     '<': Operator(2, operator.lt),
     'mod': Operator(2, operator.mod),
@@ -53,32 +54,32 @@ class IfStatement(Form):
 
     arity = 3
 
-    def apply(self, *args):
+    def apply(self, environment, *args):
         self.check_arity(args)
         condition, consequence, alternative = args
-        if evaluate(condition):
-            return evaluate(consequence)
+        if evaluate(condition, environment):
+            return evaluate(consequence, environment)
         else:
-            return evaluate(alternative)
+            return evaluate(alternative, environment)
 
 
 class BeginStatement(Form):
 
-    def apply(self, *args):
+    def apply(self, environment, *args):
         for statement in args[:-1]:
-            evaluate(statement)
-        return evaluate(args[-1])
+            evaluate(statement, environment)
+        return evaluate(args[-1], environment)
 
 
 class WhileStatement(Form):
 
     arity = 2
 
-    def apply(self, *args):
+    def apply(self, environment, *args):
         self.check_arity(args)
         condition, block = args
-        while evaluate(condition):
-            evaluate(block)
+        while evaluate(condition, environment):
+            evaluate(block, environment)
         return 0
 
 
@@ -93,7 +94,7 @@ class SetStatement(EnvironmentManager):
     def apply(self, environment, *args):
         self.check_arity(args)
         symbol, expr = args
-        value = evaluate(expr)
+        value = evaluate(expr, environment)
         environment[symbol] = value
         return value
 
@@ -118,10 +119,12 @@ class UserFunction(Form):
             self.arg_names = list(arg_names)
             self.body = list(body)
 
-        def apply(self, *args):
+        def apply(self, environment, *args):
             self.check_arity(args)
-            values = (evaluate(arg) for arg in args)
-            local_env = XXX
+            values = (evaluate(arg, environment) for arg in args)
+            local_env = dict(zip(self.arg_names, values))
+            invocation_env = collections.ChainMap(local_env, environment)
+            return evaluate(self.body, invocation_env)
 
 
 SPECIAL_FORMS = {
@@ -140,18 +143,15 @@ global_vars = {}
 global_env = collections.ChainMap(global_vars, SPECIAL_FORMS, BUILTINS)
 
 
-def evaluate(ast, environment=global_env):
+def evaluate(ast, environment):
     if isinstance(ast, int):
         return ast
     elif isinstance(ast, list):
         op = evaluate(ast[0], environment)
-        if isinstance(op, EnvironmentManager):
+        try:
             return op.apply(environment, *ast[1:])
-        else:
-            try:
-                return op.apply(*ast[1:])
-            except ZeroDivisionError as exc:
-                raise errors.DivisionByZero from exc
+        except ZeroDivisionError as exc:
+            raise errors.DivisionByZero from exc
 
     try:
         return environment[ast]

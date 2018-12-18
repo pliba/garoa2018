@@ -35,4 +35,4 @@ class DivisionByZero(EvaluatorException):
     """Division by zero."""
 
 class UnknownSymbol(EvaluatorException):
-    """Unknown function."""
+    """Unknown symbol."""
