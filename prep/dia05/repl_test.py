@@ -1,6 +1,6 @@
 from pytest import mark
 
-from dialogue import Dialogue
+from dialogue.dialogue import Dialogue
 
 from repl import repl
 
