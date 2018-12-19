@@ -16,5 +16,5 @@ O projeto [Dialogue](https://github.com/pliba/dialogue.git) é uma dependência 
 ```
 $ git remote add -f dialogue https://github.com/pliba/dialogue.git
 
-$ git subtree add --prefix onde_quero_colocar/dialogue dialogue master --squash
+$ git subtree add dialogue master --squash --prefix onde_quero_colocar/dialogue
 ```
