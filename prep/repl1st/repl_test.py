@@ -20,6 +20,15 @@ def test_repl_quit(capsys):
     """
     > 3
     3
+    > .q
+    """,
+    """
+    > 3
+    3
+    """,
+    """
+    > *
+    <Operator *>
     """,
 ])
 def test_repl(capsys, session):

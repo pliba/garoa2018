@@ -83,11 +83,7 @@ class WhileStatement(Form):
         return 0
 
 
-class EnvironmentManager(Form):
-    """Statements that change the environment."""
-
-
-class SetStatement(EnvironmentManager):
+class SetStatement(Form):
 
     arity = 2
 
@@ -99,7 +95,7 @@ class SetStatement(EnvironmentManager):
         return value
 
 
-class DefineStatement(EnvironmentManager):
+class DefineStatement(Form):
 
     arity = 3
 

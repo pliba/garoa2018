@@ -1,5 +1,7 @@
 import sys
 
+from parser import parse
+
 QUIT_COMMAND = '.q'
 
 
@@ -16,7 +18,9 @@ def repl(input_fn=input):
             break
         if not line:
             continue
-        print(line)
+
+        parsed = parse(line) 
+        print(parsed)
 
 
 if __name__=='__main__':
