@@ -18,7 +18,8 @@ def test_tokenize(source, want):
 
 @mark.parametrize("source, want", [
     ('2', 2),
-    ('(+ 2   3)', 5),
+    ('(+ 2 3)', 5),
+    ('(+ 1 2 3 4)', 10),
     ('(+ 2 (* 3 5))', 17),
     ('(/ (* (- 100 32) 5) 9)', approx(37.7, .01)),
 ])
