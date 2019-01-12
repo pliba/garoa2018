@@ -1,0 +1,3 @@
+# Moved...
+
+This example is now at: https://github.com/pliba/kaminpy/blob/master/SimpleCalc/simple-evaluator.ipynb
